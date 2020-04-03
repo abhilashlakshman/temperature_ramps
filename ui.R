@@ -97,6 +97,13 @@ shinyUI <- dashboardPage(
           tabName = "avg_com"
         ),
         tabName = "avg_com"
+      ),
+      convertMenuItem(
+        menuItem(
+          "Average consolidation",
+          tabName = "avg_consol"
+        ),
+        tabName = "avg_consol"
       )
     )
   ),
@@ -355,6 +362,31 @@ shinyUI <- dashboardPage(
               tableOutput('datatable.mut.avg.com')
             ),
             downloadButton("downloadData4","Download data")
+          )
+        ),
+        tabItem(
+          tabName = "avg_consol",
+          class = "active",
+          box(
+            title = "Wildtype",
+            solidHeader = T,
+            collapsible = F,
+            background = "green",
+            # width=5.5,
+            # height = 10,
+            plotlyOutput(
+              "wt_cyc_consol"
+            )
+          ),
+          box(
+            title = "Mutant",
+            solidHeader = T,
+            collapsible = F,
+            background = "red",
+            # width=5.5,
+            plotlyOutput(
+              "mut_cyc_consol"
+            ) 
           )
         )
       )
