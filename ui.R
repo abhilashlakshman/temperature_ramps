@@ -100,7 +100,7 @@ shinyUI <- dashboardPage(
       ),
       convertMenuItem(
         menuItem(
-          "Average consolidation",
+          "Activity consolidation",
           tabName = "avg_consol"
         ),
         tabName = "avg_consol"
@@ -368,25 +368,14 @@ shinyUI <- dashboardPage(
           tabName = "avg_consol",
           class = "active",
           box(
-            title = "Wildtype",
+            title = "Comparing consolidation",
             solidHeader = T,
             collapsible = F,
-            background = "green",
-            # width=5.5,
-            # height = 10,
+            background = "teal",
+            align = "center",
             plotlyOutput(
-              "wt_cyc_consol"
+              "avg_consol"
             )
-          ),
-          box(
-            title = "Mutant",
-            solidHeader = T,
-            collapsible = F,
-            background = "red",
-            # width=5.5,
-            plotlyOutput(
-              "mut_cyc_consol"
-            ) 
           )
         )
       )
