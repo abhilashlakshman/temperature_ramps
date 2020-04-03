@@ -2368,4 +2368,237 @@ shinyServer(function(input, output) {
       write.csv(mut_avg_com,file)
     }
   )
+  
+  # activity consolidation
+  output$avg_consol <- renderPlotly({
+    req(input$wildtype)
+    df1_consol<-read.delim(input$wildtype$datapath,
+                        header=input$header,
+                        sep=input$sep)
+    req(input$mutant)
+    df2_consol<-read.delim(input$mutant$datapath,
+                           header=input$header,
+                           sep=input$sep)
+    
+    
+    s_per_day <- (60/input$bins)*input$modulotau
+    
+    profiles.wt <- list()
+    profiles.mut <- list()
+    
+    ind.wt <- which(df1_consol[,1] == df1_consol[1,1])
+    ind.mut <- which(df2_consol[,1] == df2_consol[1,1])
+    
+    for (i in 1:length(ind.wt)){
+      profiles.wt[[i]] <- df1_consol[ind.wt[i]:(ind.wt[i]+s_per_day)-1,-c(2)]
+    }
+    for (i in 1:length(ind.mut)){
+      profiles.mut[[i]] <- df2_consol[ind.mut[i]:(ind.mut[i]+s_per_day)-1,-c(2)]
+    }
+    
+    theta<-as.matrix(df1_consol[ind.wt[i]:(ind.wt[i]+s_per_day)-1,1]*360/input$modulotau)
+    # theta.mut<-as.matrix(df2_consol[ind.mut[i]:(ind.mut[i]+s_per_day)-1,1]*360/input$modulotau)
+    
+    com.val.wt <- list()
+    com.val.mut <- list()
+    
+    for (i in 1:length(profiles.wt)){
+      x = profiles.wt[[i]]
+      x = x[,-c(1,2)]
+      
+      sin_theta <- as.matrix(sin(theta*(pi/180)))
+      cos_theta <- as.matrix(cos(theta*(pi/180)))
+      fsintheta <- matrix(0,nrow=length(x[,1]),ncol=length(x[1,]))
+      fcostheta <- matrix(0,nrow=length(x[,1]),ncol=length(x[1,]))
+      
+      for (j in 1:length(x[,1])){
+        for (k in 1:length(x[1,])){
+          fsintheta[j,k] <- sin_theta[j,1]*x[j,k]
+          fcostheta[j,k] <- cos_theta[j,1]*x[j,k]
+        }
+      }
+      
+      sum_fsintheta <- matrix(colSums(fsintheta),nrow=1)
+      sum_fcostheta <- matrix(colSums(fcostheta),nrow=1)
+      
+      n_samples<-matrix(colSums(x),nrow=1)
+      X <- matrix(0,nrow=1,ncol=length(x[1,]))
+      Y <- matrix(0,nrow=1,ncol=length(x[1,]))
+      mean_theta <- matrix(0,nrow=1,ncol=length(x[1,]))
+      mean_r <- matrix(0,nrow=1,ncol=length(x[1,]))
+      
+      for (j in 1:length(n_samples[1,])){
+        X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
+        Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
+        if (X[1,j]<0){
+          mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
+        } else {
+          mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
+        }
+        mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
+      }
+      
+      com.val.wt[[i]] <- as.vector(mean_theta)
+      com.val.wt[[i+length(ind.wt)]] <- as.vector(mean_r)
+    }
+    
+    m.wt <- matrix(0, nrow = length(com.val.wt[[1]]), ncol = length(com.val.wt))
+    
+    for (i in 1:length(com.val.wt)){
+      for (j in 1:length(com.val.wt[[1]])){
+        m.wt[j,i] = com.val.wt[[i]][j]
+      }
+    }
+    
+    name.m.wt <- vector()
+    for (i in 1:length(m.wt[1,])){
+      if (i < length(ind.wt)+1){
+        name.m.wt[i] <- c(paste("Phi.Cyc",i,sep = "")) 
+      } else {
+        name.m.wt[i] <- c(paste("r.Cyc",i-length(ind.wt),sep = ""))
+      }
+    }
+    
+    colnames(m.wt) <- name.m.wt
+    
+    consolidation.wt <- matrix(rowMeans(m.wt[,((length(ind.wt)+1):length(m.wt[1,]))]),
+                               ncol = 1)
+    
+    for (i in 1:length(profiles.mut)){
+      x = profiles.mut[[i]]
+      x = x[,-c(1,2)]
+      
+      sin_theta <- as.matrix(sin(theta*(pi/180)))
+      cos_theta <- as.matrix(cos(theta*(pi/180)))
+      fsintheta <- matrix(0,nrow=length(x[,1]),ncol=length(x[1,]))
+      fcostheta <- matrix(0,nrow=length(x[,1]),ncol=length(x[1,]))
+      
+      for (j in 1:length(x[,1])){
+        for (k in 1:length(x[1,])){
+          fsintheta[j,k] <- sin_theta[j,1]*x[j,k]
+          fcostheta[j,k] <- cos_theta[j,1]*x[j,k]
+        }
+      }
+      
+      sum_fsintheta <- matrix(colSums(fsintheta),nrow=1)
+      sum_fcostheta <- matrix(colSums(fcostheta),nrow=1)
+      
+      n_samples<-matrix(colSums(x),nrow=1)
+      X <- matrix(0,nrow=1,ncol=length(x[1,]))
+      Y <- matrix(0,nrow=1,ncol=length(x[1,]))
+      mean_theta <- matrix(0,nrow=1,ncol=length(x[1,]))
+      mean_r <- matrix(0,nrow=1,ncol=length(x[1,]))
+      
+      for (j in 1:length(n_samples[1,])){
+        X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
+        Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
+        if (X[1,j]<0){
+          mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
+        } else {
+          mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
+        }
+        mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
+      }
+      
+      com.val.mut[[i]] <- as.vector(mean_theta)
+      com.val.mut[[i+length(ind.mut)]] <- as.vector(mean_r)
+    }
+    
+    m.mut <- matrix(0, nrow = length(com.val.mut[[1]]), ncol = length(com.val.mut))
+    
+    for (i in 1:length(com.val.mut)){
+      for (j in 1:length(com.val.mut[[1]])){
+        m.mut[j,i] = com.val.mut[[i]][j]
+      }
+    }
+    
+    name.m.mut <- vector()
+    for (i in 1:length(m.mut[1,])){
+      if (i < length(ind.mut)+1){
+        name.m.mut[i] <- c(paste("Phi.Cyc",i,sep = "")) 
+      } else {
+        name.m.mut[i] <- c(paste("r.Cyc",i-length(ind.wt),sep = ""))
+      }
+    }
+    
+    colnames(m.mut) <- name.m.mut
+    
+    consolidation.mut <- matrix(rowMeans(m.mut[,((length(ind.mut)+1):length(m.mut[1,]))]),
+                                ncol = 1)
+    
+    df.plot <- matrix(
+      c(
+        mean(consolidation.wt),
+        mean(consolidation.mut),
+        sd(consolidation.wt)/sqrt(length(consolidation.wt[,1])),
+        sd(consolidation.mut)/sqrt(length(consolidation.mut[,1]))
+      ),
+      nrow = 2,
+      byrow = FALSE
+    )
+
+    f1 <- list(
+      family = "Arial, sans-serif",
+      size = 18,
+      color = "black"
+    )
+    f2 <- list(
+      family = "Arial, sans-serif",
+      size = 14,
+      color = "black"
+    )
+    ax = list(
+      title = "",
+      titlefont = f1,
+      showticklabels = T,
+      tickfont = f2,
+      zeroline = F,
+      showgrid = F,
+      showline = T,
+      linewidth = 2,
+      linecolor = "black",
+      ticklen = 7,
+      tickwidth = 2,
+      tickcolor = 'black',
+      categoryorder = 'array',
+      categoryarray = c("WT", "Mutant")
+    )
+    ay = list(
+      title = "consolidation",
+      titlefont = f1,
+      showticklabels = T,
+      tickfont = f2,
+      zeroline = T,
+      showgrid = F,
+      showline = T,
+      linewidth = 2,
+      linecolor = "black",
+      ticklen = 7,
+      tickwidth = 2,
+      tickcolor = 'black',
+      range = c(0, 1),
+      tick0 = 0,
+      dtick = 0.25
+    )
+    
+    p <- plot_ly(
+      x = c("WT","Mutant"),
+      y = ~df.plot[,1],
+      type = "bar",
+      marker = list(
+        color = c("green","red")
+      ),
+      error_y = ~list(
+        array = df.plot[,2],
+        color = "black"
+      )
+    )%>%
+      layout(
+        showlegend = F,
+        xaxis = ax,
+        yaxis = ay
+      )
+    p
+  })
+  
 })
