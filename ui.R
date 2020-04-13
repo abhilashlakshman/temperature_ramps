@@ -10,7 +10,7 @@ convertMenuItem <- function(mi,tabName) {
 
 shinyUI <- dashboardPage(
   skin = "black",
-  dashboardHeader(title = "For ramps"),
+  dashboardHeader(title = "Temperature ramps"),
   dashboardSidebar(
     sidebarMenu(
       convertMenuItem(
