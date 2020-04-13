@@ -92,9 +92,9 @@ shinyServer(function(input, output) {
       ticklen = 7,
       tickwidth = 2,
       tickcolor = 'black',
-      range = c(0, 4),
-      tick0 = 0,
-      dtick = 2
+      range = c(0, max(rowMeans(df1_forplot[,-c(1:2)]))),
+      tick0 = 0
+      # dtick = 2
     )
     ay2 = list(
       title = "temperature",
@@ -109,9 +109,9 @@ shinyServer(function(input, output) {
       ticklen = 7,
       tickwidth = 2,
       tickcolor = 'black',
-      range = c(19, 29),
-      tick0 = 20,
-      dtick = 4,
+      range = c(min(df1[,2]), max(df1[,2])),
+      # tick0 = 15,
+      # dtick = 5,
       overlaying = "y",
       side = "right"
     )
@@ -230,9 +230,9 @@ shinyServer(function(input, output) {
       ticklen = 7,
       tickwidth = 2,
       tickcolor = 'black',
-      range = c(0, 4),
-      tick0 = 0,
-      dtick = 2
+      range = c(0, max(rowMeans(df2_forplot[,-c(1:2)])))
+      # tick0 = 0
+      # dtick = 2
     )
     ay2 = list(
       title = "temperature",
@@ -247,9 +247,9 @@ shinyServer(function(input, output) {
       ticklen = 7,
       tickwidth = 2,
       tickcolor = 'black',
-      range = c(19, 29),
-      tick0 = 20,
-      dtick = 4,
+      range = c(min(df2[,2]), max(df2[,2])),
+      # tick0 = 15,
+      # dtick = 5,
       overlaying = "y",
       side = "right"
     )
@@ -996,7 +996,7 @@ shinyServer(function(input, output) {
       pro[,i]<-mean_a
     }
     
-    index <- which(df1_cyc[,1] == input$zt0)
+    index <- which(df1_ln_sl[,1] == input$zt0)
     pro <- pro[index[1]:(index[1]+input$period*(60/input$bins)),]
     x <- seq(0, input$period, by = input$bins/60)
     y <- pro[,input$ind_no]
@@ -1161,7 +1161,7 @@ shinyServer(function(input, output) {
       pro[,i]<-mean_a
     }
     
-    index <- which(df1_cyc[,1] == input$zt0)
+    index <- which(df2_ln_sl[,1] == input$zt0)
     pro <- pro[index[1]:(index[1]+input$period*(60/input$bins)),]
     x <- seq(0, input$period, by = input$bins/60)
     y <- pro[,input$ind_no]
@@ -1320,7 +1320,7 @@ shinyServer(function(input, output) {
     ind <- which(df1_cyc[,1] == df1_cyc[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df1_cyc[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df1_cyc[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df1_cyc[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -1355,9 +1355,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -1452,7 +1452,7 @@ shinyServer(function(input, output) {
     ind <- which(df2_cyc[,1] == df2_cyc[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df2_cyc[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df2_cyc[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df2_cyc[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -1487,9 +1487,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -1583,7 +1583,7 @@ shinyServer(function(input, output) {
     ind <- which(df1_cyc_com[,1] == df1_cyc_com[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df1_cyc_com[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df1_cyc_com[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df1_cyc_com[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -1617,9 +1617,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -1670,7 +1670,7 @@ shinyServer(function(input, output) {
     ind <- which(df2_cyc_com[,1] == df2_cyc_com[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df2_cyc_com[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df2_cyc_com[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df2_cyc_com[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -1704,9 +1704,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -1759,7 +1759,7 @@ shinyServer(function(input, output) {
     ind <- which(df1_cyc[,1] == df1_cyc[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df1_cyc[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df1_cyc[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df1_cyc[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -1794,9 +1794,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -1958,7 +1958,7 @@ shinyServer(function(input, output) {
     ind <- which(df1_cyc[,1] == df1_cyc[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df1_cyc[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df1_cyc[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df1_cyc[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -1993,9 +1993,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if(!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -2070,7 +2070,7 @@ shinyServer(function(input, output) {
     ind <- which(df2_cyc[,1] == df2_cyc[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df2_cyc[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df2_cyc[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df2_cyc[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -2105,9 +2105,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if(!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -2269,7 +2269,7 @@ shinyServer(function(input, output) {
     ind <- which(df2_cyc[,1] == df2_cyc[1,1])
     
     for (i in 1:length(ind)){
-      profiles[[i]] <- df2_cyc[ind[i]:(ind[i]+s_per_day)-1,-c(2)]
+      profiles[[i]] <- df2_cyc[ind[i]:(ind[i]+s_per_day)-1,]
     }
     theta<-as.matrix(df2_cyc[ind[i]:(ind[i]+s_per_day)-1,1]*360/input$modulotau)
     
@@ -2304,9 +2304,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -2390,10 +2390,10 @@ shinyServer(function(input, output) {
     ind.mut <- which(df2_consol[,1] == df2_consol[1,1])
     
     for (i in 1:length(ind.wt)){
-      profiles.wt[[i]] <- df1_consol[ind.wt[i]:(ind.wt[i]+s_per_day)-1,-c(2)]
+      profiles.wt[[i]] <- df1_consol[ind.wt[i]:(ind.wt[i]+s_per_day)-1,]
     }
     for (i in 1:length(ind.mut)){
-      profiles.mut[[i]] <- df2_consol[ind.mut[i]:(ind.mut[i]+s_per_day)-1,-c(2)]
+      profiles.mut[[i]] <- df2_consol[ind.mut[i]:(ind.mut[i]+s_per_day)-1,]
     }
     
     theta<-as.matrix(df1_consol[ind.wt[i]:(ind.wt[i]+s_per_day)-1,1]*360/input$modulotau)
@@ -2430,9 +2430,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -2461,7 +2461,8 @@ shinyServer(function(input, output) {
     
     colnames(m.wt) <- name.m.wt
     
-    consolidation.wt <- matrix(rowMeans(m.wt[,((length(ind.wt)+1):length(m.wt[1,]))]),
+    consolidation.wt <- matrix(rowMeans(m.wt[,((length(ind.wt)+1):length(m.wt[1,]))],
+                                        na.rm = T),
                                ncol = 1)
     
     for (i in 1:length(profiles.mut)){
@@ -2492,9 +2493,9 @@ shinyServer(function(input, output) {
       for (j in 1:length(n_samples[1,])){
         X[1,j] <- sum_fcostheta[1,j]/n_samples[1,j]
         Y[1,j] <- sum_fsintheta[1,j]/n_samples[1,j]
-        if (X[1,j]<0){
+        if (!is.na(X[1,j]) & X[1,j]<0){
           mean_theta[1,j] <- (pi + atan(Y[1,j]/X[1,j])) * 180/pi
-        } else {
+        } else if (!is.na(X[1,j]) & X[1,j]>0) {
           mean_theta[1,j] <- (atan(Y[1,j]/X[1,j])) * 180/pi
         }
         mean_r[1,j] <- sqrt((X[1,j]^2) + (Y[1,j]^2))
@@ -2523,15 +2524,16 @@ shinyServer(function(input, output) {
     
     colnames(m.mut) <- name.m.mut
     
-    consolidation.mut <- matrix(rowMeans(m.mut[,((length(ind.mut)+1):length(m.mut[1,]))]),
+    consolidation.mut <- matrix(rowMeans(m.mut[,((length(ind.mut)+1):length(m.mut[1,]))],
+                                         na.rm = T),
                                 ncol = 1)
     
     df.plot <- matrix(
       c(
-        mean(consolidation.wt),
-        mean(consolidation.mut),
-        sd(consolidation.wt)/sqrt(length(consolidation.wt[,1])),
-        sd(consolidation.mut)/sqrt(length(consolidation.mut[,1]))
+        mean(consolidation.wt, na.rm = T),
+        mean(consolidation.mut, na.rm = T),
+        sd(consolidation.wt, na.rm = T)/sqrt(length(consolidation.wt[,1])),
+        sd(consolidation.mut, na.rm = T)/sqrt(length(consolidation.mut[,1]))
       ),
       nrow = 2,
       byrow = FALSE
