@@ -1,5 +1,6 @@
 is.installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
 
+# Just checking if this push works.
 
 if (!require("plotly")) install.packages("plotly",dependencies = TRUE)
 if (!require("shiny")) install.packages("shiny",dependencies = TRUE)
